@@ -4,14 +4,34 @@ from igraph import Graph, plot
 
 # --------------------- Funciones auxiliares ----------------------
 
+#Prioridad de cada nodo del grafo respecto a su tipología, devuelve un vector con prioridades
 def setPrioridad(listNames):
-    return [1 if name == "Banco" else 2 if name == "Cajero" else 0 for name in listNames]
+    prioridades = []
+    for i in range(len(listNames)):
+        if listNames[i] == "Banco":
+            prioridades.append(1)
+        elif listNames[i] == "Cajero":
+            prioridades.append(2)
+    return prioridades
 
+
+#Crea una prioridad de cada nodo del grafo respecto a su tipología, devuelve un vector con prioridades
 def crearPrioridad(listNames, indexnode):
-    return 1 if listNames[indexnode] == "Banco" else 2 if listNames[indexnode] == "Cajero" else 0
+    if indexnode < len(listNames):
+        if listNames[indexnode] == "Banco":
+            return 1
+        elif listNames[indexnode] == "Cajero":
+            return 2
+    return 0  # Si el índice está fuera de rango
 
+#Busca la prioridad del nodo iterando en la lista de nombres con el indice como argumento dado
 def buscarPrioridad(listNames, indexnodeFromNodes):
-    return crearPrioridad(listNames, indexnodeFromNodes)
+    if indexnodeFromNodes < len(listNames):
+        if listNames[indexnodeFromNodes] == "Banco":
+            return 1
+        elif listNames[indexnodeFromNodes] == "Cajero":
+            return 2
+    return 0  # Si el índice está fuera de rango
 
 def calcularExito(grafo, condiciones):
     if condiciones.upper() == "SI":
@@ -36,9 +56,12 @@ def visualizarGrafo(Nodes, names, edges, weights):
 # ----------------------- Clase del Grafo -------------------------
 
 class grafoPonderado:
+    #Modificación del constructor de la clase grafo ponderado
     def __init__(self, graph={}):
         self.grafo = graph
 
+#Metodos
+    #Principal: encuentra todos los caminos entre dos nodos
     def encontrarCaminos(self, nodoInicial, nodoFinal, camino=None):
         if nodoInicial not in self.grafo or nodoFinal not in self.grafo:
             return []
@@ -55,9 +78,11 @@ class grafoPonderado:
                     caminos.append(subcamino)
         return caminos
 
+    #Ordenar caminos por peso de menor a mayor
     def ordenarCaminos(self, caminos):
         return sorted(caminos, key=self.pesoCamino)
 
+    #Encuentra el peso total de un camino
     def pesoCamino(self, camino):
         pesoTotal = 0
         for i in range(len(camino) - 1):
@@ -67,6 +92,11 @@ class grafoPonderado:
                     pesoTotal += peso
         return pesoTotal
 
+    #Getter del peso de un camino
+    def getPesoCamino(self,camino):
+        return self.pesoCamino(camino)
+
+     #Encuentra el camino mas corto entre dos nodos
     def findShortestPath(self, nodoInicial, nodoFinal, matrizCaminos=None):
         if matrizCaminos is None:
             matrizCaminos = self.encontrarCaminos(nodoInicial, nodoFinal)
@@ -74,23 +104,52 @@ class grafoPonderado:
             return []
         return self.ordenarCaminos(matrizCaminos)[0]
 
+    #Obtiene el indice de un nodo especifico desde la matriz de aristas
+    def getInidiceNodo(self, listaAristas, nodo):
+        indiceForPeso = 0
+        for nodoInicial, nodoFinal in listaAristas:
+            if nodoInicial == nodo or nodoFinal == nodo:
+                indiceForPeso = listaAristas.index((nodoInicial, nodoFinal))
+        return indiceForPeso    #Obtiene el peso de un nodo (requerido para "filtrarCaminos")
+
+
+    #Obtiene el peso de un nodo a partir del indice y la lista de pesos
+    def getPesoForNodo(self, indicePeso, listaPesos):
+        if 0 <= indicePeso < len(listaPesos):
+            for i in range(len(listaPesos)):
+                if i == indicePeso:
+                    #Retorna el peso del nodo en la lista de pesos
+                    return listaPesos[indicePeso]
+        return 0  # Valor por defecto si el índice está fuera de rango
+
+
+    #Selecciona los caminos posibles entre nodos cuyos nodos solo tengan la prioridad seleccionada
     def filtrarCaminos(self, nodoInicial, nodoFinal, matrizCaminos, listNames, listNodes, prioridad):
         caminosFiltrados = []
+
+          #Manejo de casos especiales
         if not matrizCaminos:
             return []
+        #Iteracion de cada camino en la matriz
         for camino in matrizCaminos:
-            subFiltrados = [camino[0]]
+            subFiltrados = [camino[0]] # Iniciar con el primer nodo
+            #Iteracion de cada nodo sobre el camino ("len(camino) - 1" garantiza la existencia de [i + 1])
             for i in range(len(camino) - 1):
                 nodoActual = camino[i]
                 nodoSiguiente = camino[i + 1]
+                #Verificar si nodoActual está en el grafo
                 if nodoActual not in self.grafo:
                     break
+                #Iteracion sobre el diccionario
                 for nodoDestino, _, _ in self.grafo[nodoActual]:
+                    #Obtener el indice del nodo destino en la lista de nodos
                     indexDestino = listNodes.index(nodoDestino) if nodoDestino in listNodes else -1
+                    #Verifica si el nodo destino es el nodo siguiente y si la prioridad coincide
                     if nodoDestino == nodoSiguiente and buscarPrioridad(listNames, indexDestino) == prioridad:
                         if nodoSiguiente not in subFiltrados:
                             subFiltrados.append(nodoSiguiente)
                         break
+            #Solo agregar si el camino llega al destino
             if subFiltrados[-1] == nodoFinal:
                 caminosFiltrados.append(subFiltrados)
         return caminosFiltrados
@@ -120,7 +179,9 @@ class grafoPonderado:
         return visitados
 
 # ---------------------- Entrada de datos ------------------------
+#Uso de la clase grafo:
 
+#Creacion de nodos y nombres para cada uno mediante entrada por pantalla
 Nodes = []
 names = []
 while True:

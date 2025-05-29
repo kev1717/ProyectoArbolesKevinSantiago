@@ -50,7 +50,7 @@ En esta fase, se diseñó un sistema completo basado en grafos para representar 
 Comparado con las entregas anteriores (listas doblemente enlazadas y árboles), el grafo ponderado es mucho más eficiente y permite una representación más flexible de las rutas, lo cual permite simular rutas más realistas y eficientes. Permitiendo una planificación más dinámica, control por prioridad, análisis de eficiencia, y adaptabilidad ante factores externos.
 Este modelo permite:
 - Representar rutas no jerarquicas, donde un mismo nodo puede ser alcanzado desde múltiples caminos
-- Incorporar pesos realistass
+- Incorporar pesos realistas
 - Aplicar prioridades (como Banca>Cajero)
 - Simular situaciones reales como el clima adverso
 - Visualizar la red de rutas de forma clara e interactiva

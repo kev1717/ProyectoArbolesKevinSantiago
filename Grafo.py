@@ -1,6 +1,7 @@
 import igraph as ig
 import random
 from igraph import Graph, plot
+import matplotlib.pyplot as plt
 
 # --------------------- Funciones auxiliares ----------------------
 
@@ -51,7 +52,21 @@ def visualizarGrafo(Nodes, names, edges, weights):
     indexed_edges = [(node_to_index[u], node_to_index[v]) for u, v in edges]
     g.add_edges(indexed_edges)
     g.es["weight"] = weights
-    plot(g, layout=g.layout("circle"), bbox=(600, 600), margin=40)
+
+    layout = g.layout("circle")
+
+    fig, ax = plt.subplots(figsize=(6, 6))
+    ig.plot(
+        g,
+        target=ax,
+        layout=layout,
+        vertex_size=40,
+        vertex_label=g.vs["label"],
+        edge_width=[1 + w / 2 for w in weights],
+        bbox=(400, 400),
+        margin=20
+    )
+    plt.show()
 
 # ----------------------- Clase del Grafo -------------------------
 
